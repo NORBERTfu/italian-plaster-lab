@@ -1,0 +1,5 @@
+{
+  "name": "Italian Plaster Lab",
+  "description": "An interactive, chef-persona guided wizard for selecting Italian plaster finishes based on space, texture, and application method.",
+  "requestFramePermissions": []
+}
