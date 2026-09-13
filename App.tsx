@@ -3,8 +3,9 @@ import { Space, Sheen, Texture, Method, WizardState, Product, UserInfo } from '.
 import { products } from './data';
 import { ChefHat, ArrowRight, ArrowLeft, RefreshCcw, Check, Sparkles, Home, PaintBucket, Hammer, User, Mail, Phone, Send, ExternalLink } from 'lucide-react';
 
-// 請將此處替換為您從 Google Apps Script 取得的部署網址
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDCev4PiiESLIznTagVOSs-R00WPHlvfWO750zZCRopRqGjpnvWEtHNMeYG9yCy_Q/exec'; 
+// 問卷送出改打同源的 /api/inquiry（Pages Function）。
+// 它會在伺服器端轉發到 Google 試算表並寄出通知信，所以這裡不再需要外部網址。
+const SUBMIT_ENDPOINT = '/api/inquiry';
 
 const QuestionCard = ({ 
   title, 
@@ -151,22 +152,23 @@ const App: React.FC = () => {
         timestamp: new Date().toLocaleString(),
       };
 
-      // 使用 POST 傳送資料到 Google Apps Script
-      // 注意：這裡使用 mode: 'no-cors' 是因為 Google Apps Script 重新導向的特性
-      // 雖然無法讀取 Response 內容，但資料會成功寫入
-      await fetch(GOOGLE_SCRIPT_URL, {
+      const response = await fetch(SUBMIT_ENDPOINT, {
         method: 'POST',
-        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
-      // 模擬一點載入感讓使用者知道有在處理
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // 端點會回報試算表與通知信各自的成敗；只要沒有真的收到單就丟錯，
+      // 不再像過去用 no-cors 那樣不論成敗都顯示送出成功。
+      const result = await response.json().catch(() => null);
+      if (!response.ok || !result?.ok) {
+        throw new Error(result?.error || `HTTP ${response.status}`);
+      }
+
       setSubmitted(true);
     } catch (error) {
       console.error('Submission failed', error);
-      alert('傳送失敗，請稍後再試。');
+      alert('傳送失敗，請稍後再試，或直接來信 sales@pamaterial.com。');
     } finally {
       setIsSubmitting(false);
     }
