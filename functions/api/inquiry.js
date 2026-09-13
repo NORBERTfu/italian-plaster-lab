@@ -130,8 +130,11 @@ export async function onRequestPost(context) {
   }
 
   // 只要其中一條路成功，對客戶就算收件成功。
+  // 注意：失敗時不要回 5xx。lab.pamaterial.com 在 pamaterial.com 這個 zone 底下，
+  // Cloudflare 會把 5xx 的內容換成自己的錯誤頁，前端就讀不到下面這包診斷資訊了。
+  // 一律回 200，成敗看 ok 欄位。
   const ok = sheet.ok || email.ok;
-  return json(ok ? 200 : 502, { ok, sheet, email });
+  return json(200, { ok, sheet, email });
 }
 
 export async function onRequest(context) {
