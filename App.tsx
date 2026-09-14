@@ -168,7 +168,7 @@ const App: React.FC = () => {
       setSubmitted(true);
     } catch (error) {
       console.error('Submission failed', error);
-      alert('傳送失敗，請稍後再試，或直接來信 sales@pamaterial.com。');
+      alert('傳送失敗，請稍後再試，或用 LINE @doy5115r 與我們聯絡。');
     } finally {
       setIsSubmitting(false);
     }
